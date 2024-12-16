@@ -4,119 +4,85 @@ import AVFoundation
 import Vision
 
 struct ContentView: View {
-    @StateObject private var viewModel = RealtimeClassificationViewModel()
-
-    var body: some View {
-//        VStack{
-//            CameraFeed()
-//                .edgesIgnoringSafeArea(.all)
-//        }
-        ZStack {
-            // Camera feed
-            CameraView(viewModel: viewModel)
-                .edgesIgnoringSafeArea(.all)
-
-            // Classification result overlay
-            if let result = viewModel.classificationResult {
+    @StateObject private var cameraFeedHandler: CameraFeedHandler
+        
+        init() {
+            let model = try! converted_model(configuration: MLModelConfiguration())
+            _cameraFeedHandler = StateObject(wrappedValue: CameraFeedHandler(model: model))
+        }
+        
+        var body: some View {
+            ZStack {
+                // Camera feed as the background
+                CameraPreviewView(cameraFeedHandler: cameraFeedHandler)
+                    .edgesIgnoringSafeArea(.all)
+                
+                // Align the VStack to the bottom
                 VStack {
-                    Spacer() // Push text to the bottom
-                    Text("\(result.label) (\(String(format: "%.2f", result.confidence * 100))%)")
-                        .font(.title)
-                        .bold()
-                        .padding()
-                        .background(Color.black.opacity(0.7))
-                        .foregroundColor(.white)
-                        .clipShape(Capsule())
-                        .padding(.bottom, 50)
+                    Spacer() // Push the content to the bottom
+                    
+                    VStack {
+                        Text("Predictions:")
+                            .font(.headline)
+                            .foregroundColor(.white) // To ensure text is visible
+                        
+                        List(cameraFeedHandler.predictions.indices, id: \.self) { index in
+                            HStack {
+                                Text("\(cameraFeedHandler.predictionMap[index])")
+                                    .foregroundColor(.white)
+                                Spacer()
+                                Text(String(format: "%.4f", cameraFeedHandler.predictions[index]))
+                                    .foregroundColor(.white)
+                            }
+                        }
+                        .listStyle(PlainListStyle()) // Adjust list style to fit design
+                        .frame(height: 300) // Limit list height
+                    }
+                    .padding()
+                    .background(Color.black.opacity(0.3)) // Semi-transparent black background
+                    .cornerRadius(12) // Rounded corners
+                    .frame(height: 350)
+                    .padding(.horizontal, 16) // Add padding from the sides
+                    .padding(.bottom, 30) // Padding from the bottom of the screen
                 }
             }
-        }
-        .onAppear {
-            viewModel.startCamera()
-        }
-        .onDisappear {
-            viewModel.stopCamera()
-        }
-    }
-}
-
-class RealtimeClassificationViewModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSampleBufferDelegate {
-    @Published var classificationResult: (label: String, confidence: Double)?
-    public let captureSession = AVCaptureSession()
-    private let videoOutput = AVCaptureVideoDataOutput()
-    private let model: VNCoreMLModel
-    private let queue = DispatchQueue(label: "camera.frame.processing.queue")
-
-    override init() {
-        // Load Core ML model
-        guard let modelURL = Bundle.main.url(forResource: "MobileNetV2", withExtension: "mlmodelc"),
-              let loadedModel = try? MLModel(contentsOf: modelURL) else {
-            fatalError("Failed to load MobileNetV2 model.")
-        }
-        self.model = try! VNCoreMLModel(for: loadedModel)
-
-        super.init()
-        setupCaptureSession()
-    }
-
-    private func setupCaptureSession() {
-        captureSession.sessionPreset = .vga640x480 // Optimize for speed, lower resolution
-        guard let camera = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back),
-              let input = try? AVCaptureDeviceInput(device: camera) else {
-            fatalError("Unable to access camera.")
-        }
-
-        // Add camera input
-        if captureSession.canAddInput(input) {
-            captureSession.addInput(input)
-        }
-
-        // Configure video output
-        videoOutput.setSampleBufferDelegate(self, queue: queue)
-        videoOutput.alwaysDiscardsLateVideoFrames = true
-        if captureSession.canAddOutput(videoOutput) {
-            captureSession.addOutput(videoOutput)
-        }
-        videoOutput.videoSettings = [kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA]
-    }
-
-    func startCamera() {
-        if !captureSession.isRunning {
-            captureSession.startRunning()
-        }
-    }
-
-    func stopCamera() {
-        if captureSession.isRunning {
-            captureSession.stopRunning()
-        }
-    }
-
-    // Delegate method to process video frames
-    func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
-        guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else {
-            return
-        }
-
-        // Perform prediction
-        let request = VNCoreMLRequest(model: model) { [weak self] request, error in
-            guard let results = request.results as? [VNClassificationObservation], let topResult = results.first else {
-                return
+            .onAppear {
+                cameraFeedHandler.startCamera()
             }
-            DispatchQueue.main.async {
-                self?.classificationResult = (label: topResult.identifier, confidence: Double(topResult.confidence))
+            .onDisappear {
+                cameraFeedHandler.stopCamera()
             }
         }
-
-        request.usesCPUOnly = false // Utilize GPU for better performance
-
-        let handler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, options: [:])
-        do {
-            try handler.perform([request])
-        } catch {
-            print("Failed to perform classification: \(error)")
-        }
-    }
+//    @StateObject private var viewModel = RealtimeClassificationViewModel()
+//
+//    var body: some View {
+//        ZStack {
+//            // Camera feed
+//            CameraView(viewModel: viewModel)
+//                .edgesIgnoringSafeArea(.all)
+//
+//            // Classification result overlay
+//            if let result = viewModel.classificationResult {
+//                VStack {
+//                    Spacer() // Push text to the bottom
+//                    Text("\(result.label) (\(String(format: "%.2f", result.confidence * 100))%)")
+//                        .font(.title)
+//                        .bold()
+//                        .padding()
+//                        .background(Color.black.opacity(0.7))
+//                        .foregroundColor(.white)
+//                        .clipShape(Capsule())
+//                        .padding(.bottom, 50)
+//                }
+//            }
+//        }
+//        .onAppear {
+//            viewModel.startCamera()
+//        }
+//        .onDisappear {
+//            viewModel.stopCamera()
+//        }
+//    }
 }
 
 struct CameraView: UIViewRepresentable {
@@ -156,54 +122,47 @@ struct CameraView: UIViewRepresentable {
 //    }
 }
 
-struct CameraFeed: UIViewRepresentable{
-    private let captureSession = AVCaptureSession()
-    private let previewLayer = AVCaptureVideoPreviewLayer()
-
-    func makeUIView(context: Context) -> UIView {
-        let view = UIView()
-
-        // Configure the camera session
-        captureSession.sessionPreset = .high
-
-        guard let camera = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back),
-              let input = try? AVCaptureDeviceInput(device: camera) else {
-            print("Failed to access the camera.")
-            return view
-        }
-
-        if captureSession.canAddInput(input) {
-            captureSession.addInput(input)
-        }
-
-        // Configure the preview layer
-        previewLayer.session = captureSession
-        previewLayer.videoGravity = .resizeAspectFill
-        view.layer.addSublayer(previewLayer)
-
-        // Start the camera session
-        DispatchQueue.global(qos: .userInitiated).async {
-            self.captureSession.startRunning()
-        }
-
-        return view
-    }
-
-    func updateUIView(_ uiView: UIView, context: Context) {
-        // Ensure the preview layer matches the size of the view
-        DispatchQueue.main.async {
-            self.previewLayer.frame = uiView.bounds
-        }
-    }
-
-    func dismantleUIView(_ uiView: UIView, context: Context) {
-        captureSession.stopRunning()
-    }
-}
-
-
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
+    }
+}
+
+struct CameraPreviewView: UIViewControllerRepresentable {
+    var cameraFeedHandler: CameraFeedHandler
+    
+    func makeUIViewController(context: Context) -> CameraPreviewViewController {
+        return CameraPreviewViewController(cameraFeedHandler: cameraFeedHandler)
+    }
+    
+    func updateUIViewController(_ uiViewController: CameraPreviewViewController, context: Context) {
+        // No need to update the view controller
+    }
+}
+
+class CameraPreviewViewController: UIViewController {
+    private var cameraFeedHandler: CameraFeedHandler
+    private var previewLayer: AVCaptureVideoPreviewLayer!
+    
+    init(cameraFeedHandler: CameraFeedHandler) {
+        self.cameraFeedHandler = cameraFeedHandler
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        previewLayer = AVCaptureVideoPreviewLayer(session: cameraFeedHandler.captureSession)
+        previewLayer.videoGravity = .resizeAspectFill
+        view.layer.addSublayer(previewLayer)
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        previewLayer.frame = view.bounds
     }
 }

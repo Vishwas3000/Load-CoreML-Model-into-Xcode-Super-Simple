@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		6EE87C4C2D0C5BAC00401989 /* ImagePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EE87C4B2D0C5BAC00401989 /* ImagePicker.swift */; };
 		6EE87C4E2D102EB500401989 /* converted_model.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = 6EE87C4D2D102EB500401989 /* converted_model.mlpackage */; };
+		6EE87C5E2D10327D00401989 /* CustomModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EE87C5D2D10327D00401989 /* CustomModel.swift */; };
+		6EE87C602D10329000401989 /* RealtimeClassificationViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EE87C5F2D10329000401989 /* RealtimeClassificationViewModel.swift */; };
 		FA094AA327162BB9008C2D2A /* ImageClassifierMobileNetApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA094AA227162BB9008C2D2A /* ImageClassifierMobileNetApp.swift */; };
 		FA094AA527162BB9008C2D2A /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA094AA427162BB9008C2D2A /* ContentView.swift */; };
 		FA094AA727162BBE008C2D2A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FA094AA627162BBE008C2D2A /* Assets.xcassets */; };
@@ -19,6 +21,8 @@
 /* Begin PBXFileReference section */
 		6EE87C4B2D0C5BAC00401989 /* ImagePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePicker.swift; sourceTree = "<group>"; };
 		6EE87C4D2D102EB500401989 /* converted_model.mlpackage */ = {isa = PBXFileReference; lastKnownFileType = folder.mlpackage; path = converted_model.mlpackage; sourceTree = "<group>"; };
+		6EE87C5D2D10327D00401989 /* CustomModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomModel.swift; sourceTree = "<group>"; };
+		6EE87C5F2D10329000401989 /* RealtimeClassificationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealtimeClassificationViewModel.swift; sourceTree = "<group>"; };
 		FA094A9F27162BB9008C2D2A /* ImageClassifierMobileNet.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ImageClassifierMobileNet.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FA094AA227162BB9008C2D2A /* ImageClassifierMobileNetApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageClassifierMobileNetApp.swift; sourceTree = "<group>"; };
 		FA094AA427162BB9008C2D2A /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -57,9 +61,11 @@
 		FA094AA127162BB9008C2D2A /* ImageClassifierMobileNet */ = {
 			isa = PBXGroup;
 			children = (
+				6EE87C5D2D10327D00401989 /* CustomModel.swift */,
 				FA094AB027162D25008C2D2A /* MobileNetV2.mlmodel */,
 				FA094AA227162BB9008C2D2A /* ImageClassifierMobileNetApp.swift */,
 				FA094AA427162BB9008C2D2A /* ContentView.swift */,
+				6EE87C5F2D10329000401989 /* RealtimeClassificationViewModel.swift */,
 				6EE87C4B2D0C5BAC00401989 /* ImagePicker.swift */,
 				FA094AA627162BBE008C2D2A /* Assets.xcassets */,
 				6EE87C4D2D102EB500401989 /* converted_model.mlpackage */,
@@ -146,8 +152,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6EE87C5E2D10327D00401989 /* CustomModel.swift in Sources */,
 				FA094AB127162D25008C2D2A /* MobileNetV2.mlmodel in Sources */,
 				6EE87C4E2D102EB500401989 /* converted_model.mlpackage in Sources */,
+				6EE87C602D10329000401989 /* RealtimeClassificationViewModel.swift in Sources */,
 				6EE87C4C2D0C5BAC00401989 /* ImagePicker.swift in Sources */,
 				FA094AA527162BB9008C2D2A /* ContentView.swift in Sources */,
 				FA094AA327162BB9008C2D2A /* ImageClassifierMobileNetApp.swift in Sources */,
